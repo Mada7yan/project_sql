@@ -1,35 +1,42 @@
+from sqlalchemy import Column, ForeignKey, Integer, String, Date, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
 
 class Student(Base):
-    __tablename__ = "Student"
-
-    id = Column(Integer, primary_key=True, index=True)
-    city = Column(String)
-    name = Column(String)
-    birthdate = Column(Date)
+    __tablename__ = 'students'
+    id = Column(Integer, primary_key=True)
+    date_of_birth = Column(Date)
+    place_of_birth = Column(String)
     year_of_enrollment = Column(Integer)
-
-
-class Faculty(Base):
-    __tablename__ = "Faculty"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    decan = Column(String)
-    count = Column(Integer)
+    # Relationships
+    education_details = relationship("Education", back_populates="student")
 
 
 class Education(Base):
-    __tablename__ = "Education"
-
-    id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(Integer, ForeignKey("Student.id"), primary_key=True, nullable=False)
-    faculty_id = Column(Integer, ForeignKey("Faculty.id"), primary_key=True, nullable=False)
-    group = Column(Integer)
+    __tablename__ = 'education'
+    id = Column(Integer, primary_key=True)
+    specialty = Column(String)
+    group = Column(String)
     year = Column(Integer)
-    sum = Column(Integer)
-    speciality = Column(String)
+    degree_sum = Column(Integer)  # Assuming this is an integer field
+    student_id = Column(Integer, ForeignKey('students.id'))
+    faculty_id = Column(Integer, ForeignKey('faculties.id'))
+    # Relationships
+    student = relationship("Student", back_populates="education_details")
+    faculty = relationship("Faculty", back_populates="education_details")
+
+
+class Faculty(Base):
+    __tablename__ = 'faculties'
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    dean = Column(String)
+    number_of_places = Column(Integer)
+    education_details = relationship("Education", back_populates="faculty")
+
+
+engine = create_engine('sqlite:///project.db')
+Base.metadata.create_all(engine)
